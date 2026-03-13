@@ -1,0 +1,88 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+$rootDir     = dirname(__DIR__);          // .../josix-framework
+$composeFile = $rootDir . '/docker-compose.yml';
+
+if (!is_file($composeFile)) {
+    fwrite(STDERR, "Error: no docker-compose.yml found in:\n  {$rootDir}\n");
+    exit(1);
+}
+
+$command = $argv[1] ?? null;
+
+if ($command === null || !in_array($command, ['live', 'restart', 'stop'], true)) {
+    fwrite(STDERR, "Josix CLI\n\n");
+    fwrite(STDERR, "Usage:\n");
+    fwrite(STDERR, "  josix live      Start the Josix Framework example stack (docker-compose in this project)\n");
+    fwrite(STDERR, "  josix restart   Restart the Josix Framework Docker stack\n");
+    fwrite(STDERR, "  josix stop      Stop the Josix Framework Docker stack\n\n");
+    exit(1);
+}
+
+switch ($command) {
+    case 'live':
+        $cmd = 'cd ' . escapeshellarg($rootDir) . ' && ' .
+            '(docker compose up -d || docker-compose up -d)';
+
+        fwrite(STDOUT, "Starting Josix Framework Docker stack in {$rootDir}...\n");
+        break;
+
+    case 'restart':
+        $cmd = 'cd ' . escapeshellarg($rootDir) . ' && ' .
+            '((docker compose down || docker-compose down) && (docker compose up -d || docker-compose up -d))';
+
+        fwrite(STDOUT, "Restarting Josix Framework Docker stack in {$rootDir}...\n");
+        break;
+
+    case 'stop':
+        $cmd = 'cd ' . escapeshellarg($rootDir) . ' && ' .
+            '(docker compose down || docker-compose down)';
+
+        fwrite(STDOUT, "Stopping Josix Framework Docker stack in {$rootDir}...\n");
+        break;
+}
+
+passthru($cmd, $exitCode);
+
+if ($exitCode !== 0) {
+    fwrite(STDERR, "Docker command failed (exit code {$exitCode}).\n");
+    exit($exitCode);
+}
+
+if ($command === 'live' || $command === 'restart') {
+    fwrite(STDOUT, "Waiting for the application to become available...\n");
+
+    $url       = 'http://localhost/';
+    $maxWait   = 20; // seconds
+    $interval  = 2;  // seconds between retries
+    $elapsed   = 0;
+    $healthy   = false;
+
+    while ($elapsed < $maxWait) {
+        sleep($interval);
+        $elapsed += $interval;
+
+        $context = stream_context_create(['http' => ['timeout' => 2, 'ignore_errors' => true]]);
+        $response = @file_get_contents($url, false, $context);
+
+        if ($response !== false) {
+            $healthy = true;
+            break;
+        }
+    }
+
+    if ($healthy) {
+        fwrite(STDOUT, "\033[32m✔ Josix Docker stack is running and responding.\033[0m\n");
+        fwrite(STDOUT, "Open {$url} in your browser.\n");
+    } else {
+        fwrite(STDERR, "\033[31m✘ Josix Docker stack started but the application is not responding at {$url}.\033[0m\n");
+        fwrite(STDERR, "Check container logs: docker compose logs josix_example\n");
+        exit(1);
+    }
+} else {
+    fwrite(STDOUT, "Josix Docker stack has been stopped.\n");
+}
+
