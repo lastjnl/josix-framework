@@ -3,6 +3,7 @@
 namespace Josix\Core\Routing;
 
 use Exception;
+use Josix\Core\Http\Response;
 use Josix\Core\Routing\RouteCollection;
 use Josix\Core\Routing\RouteLocator;
 use ReflectionMethod;
@@ -19,7 +20,7 @@ class Router
         $this->locator->autoDiscover($this->routes);
     }
 
-    public function dispatch(): void
+    public function dispatch(): Response
     {
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         $uri = $this->parseUri();
@@ -31,11 +32,11 @@ class Router
             exit();
         }
 
-        $this->callHandler($matched);
+        return $this->callHandler($matched);
         
     }
 
-    private function callHandler(array $route): void
+    private function callHandler(array $route): Response
     {
         ['class' => $class, 'action' => $action] = $route['handler'];
         $values = $route['values'];
@@ -48,7 +49,6 @@ class Router
 
         if (!method_exists($controller, $action)) {
             throw new Exception("Action [{$action}] not found on [{$class}].");
-            return;
         }
 
         // Inject route params in the order the method declares them
@@ -68,7 +68,7 @@ class Router
             $args[] = $value;
         }
 
-        $controller->$action(...$args);
+        return $controller->$action(...$args);
     }
 
     private function parseUri(): string

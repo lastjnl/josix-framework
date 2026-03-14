@@ -5,6 +5,8 @@ namespace Josix\Core\Database;
 use Josix\Core\Database\Query;
 use Josix\Core\Env\Env;
 use PDO;
+use PDOException;
+use RuntimeException;
 
 class Connection
 {
@@ -12,17 +14,18 @@ class Connection
 
     public function __construct()
     {
-        $driver = Env::getString('DB_DRIVER') ?: 'mysql';
+        $driver = strtolower(trim((string) (Env::getString('DB_DRIVER') ?? '')));
+        $driver = $driver !== '' ? $driver : 'sqlite';
 
         match ($driver) {
             'sqlite' => $this->createSqliteConnection(
                 Env::getString('DB_PATH') ?: ':memory:'
             ),
             default => $this->createMysqlConnection(
-                Env::getString('DBHOST'),
-                Env::getString('DBNAME'),
-                Env::getString('DBUSER'),
-                Env::getString('DBPASS'),
+                (string) (Env::getString('DBHOST') ?? ''),
+                (string) (Env::getString('DBNAME') ?? ''),
+                (string) (Env::getString('DBUSER') ?? ''),
+                (string) (Env::getString('DBPASS') ?? ''),
             ),
         };
     }
@@ -33,8 +36,27 @@ class Connection
         string $username,
         string $password
     ): void {
-        $this->connection = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-        $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        if ($host === '' || $dbname === '' || $username === '') {
+            throw new RuntimeException(
+                'MySQL selected but DBHOST, DBNAME, or DBUSER is missing. ' .
+                'Set DB_DRIVER=sqlite for local development, or provide full MySQL env values.'
+            );
+        }
+
+        try {
+            $this->connection = new PDO(
+                "mysql:host=$host;dbname=$dbname;charset=utf8mb4",
+                $username,
+                $password
+            );
+            $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            throw new RuntimeException(
+                'Failed to connect using MySQL. Ensure pdo_mysql is installed in PHP and DB env values are correct.',
+                0,
+                $e
+            );
+        }
     }
 
     private function createSqliteConnection(string $path): void

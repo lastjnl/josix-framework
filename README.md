@@ -46,6 +46,17 @@ DB_PATH=database/josix.sqlite
 # DBPASS=secret
 ```
 
+Or let Josix create a local SQLite-ready setup for you:
+
+```bash
+composer josix:db:init
+```
+
+This command:
+- creates `.env` from `.env.dist` when missing,
+- ensures `DB_DRIVER` and `DB_PATH` defaults exist,
+- creates the SQLite file (default: `database/josix.sqlite`).
+
 ### 3. Start the app
 
 **With Docker (recommended):**
@@ -54,6 +65,7 @@ DB_PATH=database/josix.sqlite
 composer josix:live      # Start the Docker stack
 composer josix:restart   # Rebuild & restart
 composer josix:stop      # Stop the stack
+composer josix:db:init   # Create SQLite file from .env/.env.dist
 ```
 
 The CLI will wait for the app to respond and print a ✔ or ✘.
@@ -196,6 +208,20 @@ DBHOST=127.0.0.1
 DBNAME=josix
 DBUSER=root
 DBPASS=secret
+```
+
+### Initialize local SQLite database
+
+For local development, run:
+
+```bash
+composer josix:db:init
+```
+
+Then start the app with Docker:
+
+```bash
+composer josix:live
 ```
 
 ### Usage

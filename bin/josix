@@ -11,18 +11,130 @@ if (!is_file($composeFile)) {
     exit(1);
 }
 
+function readEnvValue(string $envFile, string $key): ?string
+{
+    if (!is_file($envFile)) {
+        return null;
+    }
+
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($lines === false) {
+        return null;
+    }
+
+    foreach ($lines as $line) {
+        $line = trim($line);
+
+        if ($line === '' || str_starts_with($line, '#')) {
+            continue;
+        }
+
+        [$k, $v] = array_pad(explode('=', $line, 2), 2, null);
+        if ($k === $key && $v !== null) {
+            return trim($v);
+        }
+    }
+
+    return null;
+}
+
+function appendEnvDefaultsIfMissing(string $envFile): void
+{
+    $contents = is_file($envFile) ? (string) file_get_contents($envFile) : '';
+
+    if ($contents !== '' && !str_ends_with($contents, "\n")) {
+        $contents .= "\n";
+    }
+
+    if (readEnvValue($envFile, 'DB_DRIVER') === null) {
+        $contents .= "DB_DRIVER=sqlite\n";
+    }
+
+    if (readEnvValue($envFile, 'DB_PATH') === null) {
+        $contents .= "DB_PATH=database/josix.sqlite\n";
+    }
+
+    file_put_contents($envFile, $contents);
+}
+
+/**
+ * Validate Docker can see the project directory through bind mounts.
+ */
+function canDockerMountProject(string $rootDir): bool
+{
+    $mount = escapeshellarg($rootDir . ':/workspace');
+    $probe = escapeshellarg('test -d /workspace/public');
+    $cmd   = "docker run --rm -v {$mount} php:8.3-cli sh -lc {$probe} >/dev/null 2>&1";
+
+    exec($cmd, $output, $exitCode);
+
+    return $exitCode === 0;
+}
+
 $command = $argv[1] ?? null;
 
-if ($command === null || !in_array($command, ['live', 'restart', 'stop'], true)) {
+if ($command === null || !in_array($command, ['live', 'restart', 'stop', 'db:init'], true)) {
     fwrite(STDERR, "Josix CLI\n\n");
     fwrite(STDERR, "Usage:\n");
     fwrite(STDERR, "  josix live      Start the Josix Framework example stack (docker-compose in this project)\n");
     fwrite(STDERR, "  josix restart   Restart the Josix Framework Docker stack\n");
     fwrite(STDERR, "  josix stop      Stop the Josix Framework Docker stack\n\n");
+    fwrite(STDERR, "  josix db:init   Create local SQLite database file from .env settings\n\n");
+    exit(1);
+}
+
+if (($command === 'live' || $command === 'restart') && !canDockerMountProject($rootDir)) {
+    fwrite(STDERR, "\033[31m✘ Docker cannot read this project path via bind mount:\033[0m\n");
+    fwrite(STDERR, "  {$rootDir}\n\n");
+    fwrite(STDERR, "Fix (Docker Desktop):\n");
+    fwrite(STDERR, "  1. Settings -> Resources -> File Sharing\n");
+    fwrite(STDERR, "  2. Add {$rootDir} (or /var/www)\n");
+    fwrite(STDERR, "  3. Apply & Restart Docker Desktop\n");
+    fwrite(STDERR, "  4. Run composer josix:live again\n\n");
+    fwrite(STDERR, "Alternative: move project under /home/<user>/ and run from there.\n");
     exit(1);
 }
 
 switch ($command) {
+    case 'db:init':
+        $envFile = $rootDir . '/.env';
+        $envDist = $rootDir . '/.env.dist';
+
+        if (!is_file($envFile) && is_file($envDist)) {
+            copy($envDist, $envFile);
+            fwrite(STDOUT, "Created .env from .env.dist\n");
+        }
+
+        appendEnvDefaultsIfMissing($envFile);
+
+        $driver = strtolower((string) (readEnvValue($envFile, 'DB_DRIVER') ?? 'sqlite'));
+        if ($driver !== 'sqlite') {
+            fwrite(STDERR, "DB_DRIVER is '{$driver}', not sqlite. Skipping file creation.\n");
+            fwrite(STDERR, "Set DB_DRIVER=sqlite in .env and rerun josix db:init if you want a SQLite file.\n");
+            exit(1);
+        }
+
+        $dbPath = (string) (readEnvValue($envFile, 'DB_PATH') ?? 'database/josix.sqlite');
+        if ($dbPath === '' || $dbPath === ':memory:') {
+            $dbPath = 'database/josix.sqlite';
+        }
+
+        $absoluteDbPath = str_starts_with($dbPath, '/') ? $dbPath : $rootDir . '/' . $dbPath;
+        $dbDir          = dirname($absoluteDbPath);
+
+        if (!is_dir($dbDir)) {
+            mkdir($dbDir, 0755, true);
+        }
+
+        if (!is_file($absoluteDbPath)) {
+            touch($absoluteDbPath);
+            fwrite(STDOUT, "Created SQLite file: {$absoluteDbPath}\n");
+        } else {
+            fwrite(STDOUT, "SQLite file already exists: {$absoluteDbPath}\n");
+        }
+
+        exit(0);
+
     case 'live':
         $cmd = 'cd ' . escapeshellarg($rootDir) . ' && ' .
             '(docker compose up -d || docker-compose up -d)';

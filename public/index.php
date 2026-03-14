@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Josix\Controller\Controller;
 use Josix\Core\Env\EnvLoader;
 use Josix\Core\Injection\Container;
 use Josix\Core\Routing\RouteCollection;
@@ -45,9 +46,13 @@ $container = new Container([
     },
 ]);
 
+// Boot shared controller
+Controller::init($container->get(Environment::class));
+
 $routes    = new RouteCollection();
 $locator   = new RouteLocator();
 $router    = new Router($locator, $routes, $container);
 
-$router->dispatch();
+$response = $router->dispatch();
+$response->send();
 

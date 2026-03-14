@@ -6,6 +6,7 @@ use Exception;
 use Josix\Core\Exception\ServiceNotFoundException;
 use ReflectionClass;
 use ReflectionNamedType;
+use Twig\Environment;
 
 class Container
 {
@@ -36,7 +37,7 @@ class Container
 
         // Existing: factory callable
         if (is_callable($config)) {
-            return call_user_func($config);
+            return $this->initializeService(call_user_func($config));
         }
 
         // Existing: alias string
@@ -55,7 +56,7 @@ class Container
             $config
         );
 
-        return new $id(...$args);
+        return $this->initializeService(new $id(...$args));
     }
 
     private function autowire(string $id)
@@ -70,7 +71,7 @@ class Container
 
         // No constructor = no dependencies, just create it
         if($constructor === null) {
-            return new $id();
+            return $this->initializeService(new $id());
         }
 
         $args = [];
@@ -91,7 +92,16 @@ class Container
             }
         }
 
-        return new $id(...$args);
+        return $this->initializeService(new $id(...$args));
+    }
+
+    private function initializeService(mixed $service): mixed
+    {
+        if ($service instanceof NeedsTwig) {
+            $service->setTwig($this->get(Environment::class));
+        }
+
+        return $service;
     }
 }
 

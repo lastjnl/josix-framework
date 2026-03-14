@@ -4,22 +4,17 @@ declare(strict_types=1);
 
 namespace Josix\Controller;
 
+use Josix\Core\Http\Response;
 use Josix\Core\Routing\Route;
-use Twig\Environment;
 
-class HomeController
+class HomeController extends Controller
 {
-    public function __construct(
-        private readonly Environment $twig,
-    ) {
-    }
-
     #[Route(path: '/', method: 'GET', name: 'home')]
-    public function index(): void
+    public function index(): Response
     {
-        echo $this->twig->render('home.html.twig', [
-            'title' => 'Welcome to Josix',
-        ]);
+        return new Response(
+            $this->render('home.html.twig', ['title' => 'Welcome to Josix'])
+        );
     }
 }
 
