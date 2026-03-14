@@ -59,9 +59,9 @@ class RouteCollection
 
         $regex = preg_replace_callback(
             '/\{(\w+)\}/',
-            function (array $m) use (&$params): string {
-                $params[] = $m[1];
-                return '(?P<' . $m[1] . '>[^/]+)';
+            function (array $matches) use (&$params): string {
+                $params[] = $matches[1];
+                return '(?P<' . $matches[1] . '>[^/]+)';
             },
             $path
         );

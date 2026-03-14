@@ -46,9 +46,9 @@ class NoteController extends Controller
     }
 
     #[Route(path: '/notes/{id}/delete', method: 'POST', name: 'notes.delete')]
-    public function delete(int $id): void
+    public function delete(int $noteId): void
     {
-        $this->notes->delete($id);
+        $this->notes->delete($noteId);
 
         header('Location: /notes');
         exit;

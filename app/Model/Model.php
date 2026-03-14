@@ -2,6 +2,10 @@
 
 namespace Josix\Model;
 
+use InvalidArgumentException;
+use ReflectionClass;
+use ReflectionProperty;
+
 abstract class Model
 {
     protected array $properties = [];
@@ -36,7 +40,7 @@ abstract class Model
                 foreach ($value as $index => $item) {
                     if (!$item instanceof $expectedClass) {
                         $actualType = is_object($item) ? get_class($item) : gettype($item);
-                        throw new \InvalidArgumentException(
+                        throw new InvalidArgumentException(
                             "Item at index {$index} in '{$name}' must be an instance of {$expectedClass}, got {$actualType}."
                         );
                     }
@@ -46,7 +50,7 @@ abstract class Model
             $expectedClass = $this->resolveObjectType($name);
             if ($expectedClass !== null && !$value instanceof $expectedClass) {
                 $actualType = get_class($value);
-                throw new \InvalidArgumentException(
+                throw new InvalidArgumentException(
                     "Property '{$name}' must be an instance of {$expectedClass}, got {$actualType}."
                 );
             }
@@ -74,7 +78,7 @@ abstract class Model
     private function resolveDocblockType(string $propertyName, string $pattern): ?string
     {
         try {
-            $reflection = new \ReflectionProperty(static::class, $propertyName);
+            $reflection = new ReflectionProperty(static::class, $propertyName);
         } catch (\ReflectionException) {
             return null;
         }
@@ -97,7 +101,7 @@ abstract class Model
 
         // Resolve relative class names against the model's namespace
         if (!class_exists($className)) {
-            $namespace = (new \ReflectionClass(static::class))->getNamespaceName();
+            $namespace = (new ReflectionClass(static::class))->getNamespaceName();
             $fqcn = $namespace . '\\' . $className;
             if (class_exists($fqcn)) {
                 return $fqcn;

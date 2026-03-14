@@ -75,7 +75,8 @@ class Router
         $uri = $_SERVER['REQUEST_URI'] ?? '/';
 
         // Strip query string
-        if (false !== $pos = strpos($uri, '?')) {
+        $pos = strpos($uri, '?');   
+        if ($pos !== false) {
             $uri = substr($uri, 0, $pos);
         }
 

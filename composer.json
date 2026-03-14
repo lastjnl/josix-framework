@@ -37,7 +37,7 @@
         "test:phpunit": "./vendor/bin/phpunit tests",
         "phpcs:analyse": "php-cs-fixer fix --dry-run --diff",
         "phpcs:fix":  "php-cs-fixer fix",
-        "phpmd:analyse":    "phpmd src/ text cleancode,codesize,naming,unusedcode",
+        "phpmd:analyse":    "phpmd app/ text cleancode,codesize,naming,unusedcode",
         "phpstan:analyse":    "phpstan analyse",
         "josix:db:init": "php bin/josix db:init",
         "josix:doctor": "php bin/josix doctor",

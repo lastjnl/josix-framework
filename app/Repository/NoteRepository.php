@@ -6,7 +6,9 @@ namespace Josix\Repository;
 
 use Josix\Core\Database\Connection;
 use Josix\Core\Database\QueryBuilder;
+use Josix\Model\Hydrator\NoteHydrator;
 use Josix\Model\Note;
+use PDO;
 
 class NoteRepository extends AbstractRepository
 {
@@ -31,8 +33,8 @@ class NoteRepository extends AbstractRepository
             'SELECT * FROM notes ORDER BY created_at DESC'
         );
 
-        $rows     = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        $hydrator = new \Josix\Model\Hydrator\NoteHydrator();
+        $rows     = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $hydrator = new NoteHydrator();
 
         return $hydrator->hydrate($rows);
     }

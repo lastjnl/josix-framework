@@ -72,7 +72,10 @@ class Connection
         return $this->connection;
     }
 
-    public function execute(Query $query): array|object
+    /**
+     * @return array<string, mixed>
+     */
+    public function execute(Query $query): array
     {
         $statement = $this->connection->prepare($query->getSql());
         $statement->execute($query->getParameters());

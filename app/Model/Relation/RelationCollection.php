@@ -2,7 +2,12 @@
 
 namespace Josix\Model\Relation;
 
-class RelationCollection implements \IteratorAggregate, \ArrayAccess
+use ArrayAccess;
+use ArrayIterator;
+use IteratorAggregate;
+use Traversable;
+
+class RelationCollection implements IteratorAggregate, ArrayAccess
 {
     /** @var Relation[] $relations */
     private array $relations;
@@ -15,9 +20,9 @@ class RelationCollection implements \IteratorAggregate, \ArrayAccess
         $this->relations = $relations;
     }
 
-    public function getIterator(): \Traversable
+    public function getIterator(): Traversable
     {
-        return new \ArrayIterator($this->relations);
+        return new ArrayIterator($this->relations);
     }
 
     public function offsetExists(mixed $offset): bool

@@ -14,24 +14,24 @@ class Container
 
     public function __construct(private array $config = []) {}
 
-    public function has(string $id): bool
+    public function has(string $identifier): bool
     {
-        return array_key_exists($id, $this->config) || class_exists($id);
+        return array_key_exists($identifier, $this->config) || class_exists($identifier);
     }
 
-    public function get(string $id): mixed
+    public function get(string $identifier): mixed
     {
-        if (!$this->has($id)) {
-            throw new ServiceNotFoundException($id);
+        if (!$this->has($identifier)) {
+            throw new ServiceNotFoundException($identifier);
         }
 
-        $this->instances[$id] ??= $this->instantiateService($id);
-        return $this->instances[$id];
+        $this->instances[$identifier] ??= $this->instantiateService($identifier);
+        return $this->instances[$identifier];
     }
 
-    private function instantiateService(string $id): mixed
+    private function instantiateService(string $identifier): mixed
     {
-        $config = $this->config[$id] ?? null;
+        $config = $this->config[$identifier] ?? null;
 
         // Existing: factory callable
         if (is_callable($config)) {
@@ -45,7 +45,7 @@ class Container
 
         // No config, try to autowire
         if ($config === null) {
-            return $this->autowire($id);
+            return $this->autowire($identifier);
         }
 
         // Existing: explicit dependency array
@@ -54,22 +54,22 @@ class Container
             $config
         );
 
-        return $this->initializeService(new $id(...$args));
+        return $this->initializeService(new $identifier(...$args));
     }
 
-    private function autowire(string $id)
+    private function autowire(string $identifier)
     {
-        $reflector = new ReflectionClass($id);
+        $reflector = new ReflectionClass($identifier);
 
         if (!$reflector->isInstantiable()) {
-            throw new Exception("Cannot autowire $id: not instantiable.");
+            throw new Exception("Cannot autowire $identifier: not instantiable.");
         }
 
         $constructor = $reflector->getConstructor();
 
         // No constructor = no dependencies, just create it
         if ($constructor === null) {
-            return $this->initializeService(new $id());
+            return $this->initializeService(new $identifier());
         }
 
         $args = [];
@@ -82,15 +82,15 @@ class Container
             } elseif ($param->isDefaultValueAvailable()) {
                 // Scalar with a default -> use the default
                 $args[$param->getName()] = $param->getDefaultValue();
-            } else {
-                throw new Exception(
-                    "Cannot autowire parameter \${$param->getName()} of $id: "
-                    . "it's a scalar with no default. Add it to the config manually."
-                );
             }
+            
+            throw new Exception(
+                "Cannot autowire parameter \${$param->getName()} of $identifier: "
+                . "it's a scalar with no default. Add it to the config manually."
+            );
         }
 
-        return $this->initializeService(new $id(...$args));
+        return $this->initializeService(new $identifier(...$args));
     }
 
     private function initializeService(mixed $service): mixed

@@ -2,6 +2,7 @@
 
 namespace Josix\Core\Database;
 
+use InvalidArgumentException;
 use Josix\Model\Relation\Join;
 use ReflectionClass;
 
@@ -9,8 +10,13 @@ class Query
 {
     public const SELECT = 'select';
 
+    /** @var array<string, string> */
     private array $selectValues = [];
+
+    /** @var Join[] */
     private array $joins = [];
+
+    /** @var array<string, string> */
     private array $parameters = [];
 
     public function __construct(private string $mode, private string $table, private ?string $modelClass)
@@ -71,7 +77,7 @@ class Query
         $clean = preg_replace('/[^a-zA-Z0-9_.]/', '', $snake);
 
         if ($clean === '' || $clean !== $snake) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 "Invalid SQL identifier [{$identifier}]. "
                 . "Only letters, numbers, underscores and dots are allowed."
             );

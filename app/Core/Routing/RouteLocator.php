@@ -52,7 +52,4 @@ class RouteLocator
 
         }
     }
-
-
-    private function registerLocatedRoutes(RouteCollection $collection): void {}
 }

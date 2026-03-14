@@ -13,6 +13,9 @@ abstract class Controller
         self::$twig = $twig;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     protected function render(string $template, array $data = []): string
     {
         return self::$twig->render($template, $data);
