@@ -66,6 +66,8 @@ composer josix:live      # Start the Docker stack
 composer josix:restart   # Rebuild & restart
 composer josix:stop      # Stop the stack
 composer josix:db:init   # Create SQLite file from .env/.env.dist
+composer josix:doctor    # Check bind-mount health and file drift
+composer josix:sync      # Repair container files from host copy
 ```
 
 The CLI will wait for the app to respond and print a ✔ or ✘.
@@ -293,9 +295,50 @@ CLI commands:
 
 | Command | Description |
 |---|---|
+| `composer josix:doctor` | Check bind-mount health and detect host/container drift |
 | `composer josix:live` | Start the Docker stack |
 | `composer josix:restart` | Stop + start with a health-check |
+| `composer josix:sync` | Copy `app/`, `public/`, `templates/`, and `bin/` into the running container |
 | `composer josix:stop` | Stop the Docker stack |
+
+### Docker Desktop recovery
+
+If Docker Desktop serves stale or truncated files from the bind mount, run:
+
+```bash
+composer josix:doctor
+composer josix:sync
+```
+
+Use `josix:doctor` to detect bind-mount drift and `josix:sync` to repair the running container without a full rebuild.
+
+### Native Docker Engine on Linux
+
+If you want the most reliable bind-mount setup on Linux, use native Docker Engine instead of Docker Desktop.
+
+Typical migration flow:
+
+```bash
+sudo systemctl stop docker-desktop
+sudo snap remove docker
+sudo apt-get update
+sudo apt-get install -y docker.io docker-compose-v2
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER
+newgrp docker
+docker context use default
+docker version
+docker compose version
+```
+
+Then restart your project normally:
+
+```bash
+docker compose down --remove-orphans
+composer josix:live
+```
+
+If your distro does not provide `docker-compose-v2`, install Docker Engine from Docker's official apt repository instead.
 
 ---
 

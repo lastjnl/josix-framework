@@ -26,8 +26,8 @@ abstract class AbstractRepository
     public function findBy(ValueBag $valueBag): array
     {
         $query = $this->queryBuilder->select(
-            $this->table, 
-            $this->modelClass, 
+            $this->table,
+            $this->modelClass,
             $valueBag
         );
 
@@ -188,7 +188,6 @@ abstract class AbstractRepository
         $reflectionClass = new ReflectionClass($this->modelClass);
         $hydrator = "Josix\\Model\\Hydrator\\" . $reflectionClass->getShortName() . "Hydrator";
 
-        return class_exists($hydrator) ? new $hydrator : null;
+        return class_exists($hydrator) ? new $hydrator() : null;
     }
 }
-

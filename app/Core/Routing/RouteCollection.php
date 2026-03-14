@@ -72,4 +72,3 @@ class RouteCollection
         return [$regex, $params];
     }
 }
-

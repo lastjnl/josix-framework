@@ -4,16 +4,14 @@ namespace Josix\Model\Relation;
 
 use Josix\Core\Database\Query;
 
-class Relation 
+class Relation
 {
     public function __construct(
-        private RelationTypeEnum $type, 
-        protected ?string $modelKey, 
-        protected string $relationModelKey, 
+        private RelationTypeEnum $type,
+        protected ?string $modelKey,
+        protected string $relationModelKey,
         protected string $relationModel
-    )
-    {
-    }
+    ) {}
 
     public function getRelationModel(): string
     {
@@ -78,4 +76,3 @@ class Relation
         return implode(", ", $jsonParts);
     }
 }
-

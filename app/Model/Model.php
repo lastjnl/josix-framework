@@ -107,4 +107,3 @@ abstract class Model
         return class_exists($className) ? $className : null;
     }
 }
-

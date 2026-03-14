@@ -7,4 +7,3 @@ enum RelationTypeEnum: string
     case HasMany = 'hasMany';
     case HasOne = 'hasOne';
 }
-

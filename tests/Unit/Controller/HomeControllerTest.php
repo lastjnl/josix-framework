@@ -13,7 +13,7 @@ final class HomeControllerTest extends AbstractControllerTestCase
 {
     protected function createController(): object
     {
-        return new HomeController($this->twig);
+        return new HomeController();
     }
 
     public function testIndexRendersCorrectTemplate(): void

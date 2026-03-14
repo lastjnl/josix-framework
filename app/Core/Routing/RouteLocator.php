@@ -37,7 +37,7 @@ class RouteLocator
             foreach ($reflector->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
                 $attributes = $method->getAttributes(Route::class);
 
-                foreach($attributes as $attribute) {
+                foreach ($attributes as $attribute) {
                     $route = $attribute->newInstance();
 
                     $collection->add(
@@ -49,14 +49,10 @@ class RouteLocator
                     );
                 }
             }
-     
+
         }
     }
 
 
-    private function registerLocatedRoutes(RouteCollection $collection): void
-    {
-        
-    }
+    private function registerLocatedRoutes(RouteCollection $collection): void {}
 }
-

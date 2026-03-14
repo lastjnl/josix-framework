@@ -4,7 +4,4 @@ namespace Josix\Core\Exception;
 
 use Exception;
 
-class ServiceNotFoundException extends Exception
-{
-}
-
+class ServiceNotFoundException extends Exception {}

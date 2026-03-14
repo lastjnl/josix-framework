@@ -13,7 +13,7 @@ class Query
     private array $joins = [];
     private array $parameters = [];
 
-    public function __construct(private string $mode, private string $table, private ?string $modelClass, )
+    public function __construct(private string $mode, private string $table, private ?string $modelClass)
     {
         $this->table = self::sanitize($table);
         if ($mode === self::SELECT) {
@@ -37,7 +37,7 @@ class Query
             $this->joins[] = $join->join;
         }
         if (strlen($join->selectValue)) {
-            $this->selectValues[] = $join->selectValue; 
+            $this->selectValues[] = $join->selectValue;
         }
     }
 
@@ -72,8 +72,8 @@ class Query
 
         if ($clean === '' || $clean !== $snake) {
             throw new \InvalidArgumentException(
-                "Invalid SQL identifier [{$identifier}]. " .
-                "Only letters, numbers, underscores and dots are allowed."
+                "Invalid SQL identifier [{$identifier}]. "
+                . "Only letters, numbers, underscores and dots are allowed."
             );
         }
 
@@ -84,4 +84,3 @@ class Query
         ));
     }
 }
-

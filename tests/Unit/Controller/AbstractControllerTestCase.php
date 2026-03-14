@@ -12,12 +12,15 @@ use Twig\Environment;
 abstract class AbstractControllerTestCase extends TestCase
 {
     protected Environment&MockObject $twig;
+
+    /** @var T $controller */
     protected object $controller;
 
     protected function setUp(): void
     {
         $this->twig = $this->createMock(Environment::class);
         $this->controller = $this->createController();
+        $this->controller::init($this->twig);
     }
 
     /**

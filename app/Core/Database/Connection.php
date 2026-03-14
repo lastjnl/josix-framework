@@ -38,8 +38,8 @@ class Connection
     ): void {
         if ($host === '' || $dbname === '' || $username === '') {
             throw new RuntimeException(
-                'MySQL selected but DBHOST, DBNAME, or DBUSER is missing. ' .
-                'Set DB_DRIVER=sqlite for local development, or provide full MySQL env values.'
+                'MySQL selected but DBHOST, DBNAME, or DBUSER is missing. '
+                . 'Set DB_DRIVER=sqlite for local development, or provide full MySQL env values.'
             );
         }
 
@@ -80,4 +80,3 @@ class Connection
         return $statement->fetchAll(PDO::FETCH_ASSOC);
     }
 }
-

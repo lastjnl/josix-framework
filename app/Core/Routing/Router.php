@@ -7,10 +7,9 @@ use Josix\Core\Http\Response;
 use Josix\Core\Routing\RouteCollection;
 use Josix\Core\Routing\RouteLocator;
 use ReflectionMethod;
-
 use Josix\Core\Injection\Container;
 
-class Router 
+class Router
 {
     public function __construct(
         private readonly RouteLocator $locator,
@@ -33,7 +32,7 @@ class Router
         }
 
         return $this->callHandler($matched);
-        
+
     }
 
     private function callHandler(array $route): Response
@@ -83,4 +82,3 @@ class Router
         return '/' . trim($uri, '/');
     }
 }
-

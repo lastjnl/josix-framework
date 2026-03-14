@@ -13,8 +13,7 @@ class NoteController extends Controller
 {
     public function __construct(
         private readonly NoteRepository $notes,
-    ) {
-    }
+    ) {}
 
     #[Route(path: '/notes', method: 'GET', name: 'notes.index')]
     public function index(): Response

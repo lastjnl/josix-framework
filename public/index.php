@@ -29,7 +29,7 @@ if ($dbPath !== ':memory:' && !str_starts_with($dbPath, '/')) {
     // Ensure the directory exists
     $dbDir = dirname($dbPath);
     if (!is_dir($dbDir)) {
-        mkdir($dbDir, 0755, true);
+        mkdir($dbDir, 0o755, true);
     }
 
     putenv("DB_PATH=$dbPath");
@@ -55,4 +55,3 @@ $router    = new Router($locator, $routes, $container);
 
 $response = $router->dispatch();
 $response->send();
-

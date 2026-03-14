@@ -10,7 +10,8 @@ class RelationCollection implements \IteratorAggregate, \ArrayAccess
     /**
      * @param Relation[] $relations
      */
-    public function __construct(array $relations){
+    public function __construct(array $relations)
+    {
         $this->relations = $relations;
     }
 

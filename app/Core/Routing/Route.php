@@ -11,4 +11,3 @@ class Route
         public readonly ?string $name = null
     ) {}
 }
-

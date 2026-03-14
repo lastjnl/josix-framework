@@ -7,7 +7,7 @@ use Twig\Environment;
 abstract class Controller
 {
     private static ?Environment $twig = null;
-    
+
     public static function init(Environment $twig): void
     {
         self::$twig = $twig;

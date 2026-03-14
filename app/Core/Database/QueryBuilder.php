@@ -8,8 +8,8 @@ use Josix\Core\Database\ValueBag;
 class QueryBuilder
 {
     public function select(
-        string $table, 
-        ?string $modelClass, 
+        string $table,
+        ?string $modelClass,
         ?ValueBag $valueBag = null
     ): Query {
         $query = new Query(Query::SELECT, $table, $modelClass);
@@ -21,7 +21,6 @@ class QueryBuilder
             }
         }
 
-        return $query; 
+        return $query;
     }
 }
-

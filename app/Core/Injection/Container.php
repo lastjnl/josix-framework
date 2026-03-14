@@ -11,10 +11,8 @@ use Twig\Environment;
 class Container
 {
     private array $instances = [];
-    
-    public function __construct(private array $config = [])
-    {
-    }
+
+    public function __construct(private array $config = []) {}
 
     public function has(string $id): bool
     {
@@ -70,7 +68,7 @@ class Container
         $constructor = $reflector->getConstructor();
 
         // No constructor = no dependencies, just create it
-        if($constructor === null) {
+        if ($constructor === null) {
             return $this->initializeService(new $id());
         }
 
@@ -86,8 +84,8 @@ class Container
                 $args[$param->getName()] = $param->getDefaultValue();
             } else {
                 throw new Exception(
-                    "Cannot autowire parameter \${$param->getName()} of $id: " .
-                    "it's a scalar with no default. Add it to the config manually."
+                    "Cannot autowire parameter \${$param->getName()} of $id: "
+                    . "it's a scalar with no default. Add it to the config manually."
                 );
             }
         }
@@ -104,4 +102,3 @@ class Container
         return $service;
     }
 }
-
